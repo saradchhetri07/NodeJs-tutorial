@@ -1,48 +1,84 @@
-const { json } = require("body-parser");
-const e = require("express");
-const fs = require("fs");
-const path = require("path");
-const Cart = require("./cart");
-const db = require("../util/database");
-const p = path.join(
-  path.dirname(process.mainModule.filename),
-  "data",
-  "products.json"
-);
+const mongodb = require("mongodb");
 
-const getProductsFromFile = (cb) => {
-  fs.readFile(p, (err, fileContent) => {
-    if (err) {
-      cb([]);
-    } else {
-      cb(JSON.parse(fileContent));
-    }
-  });
-};
-
-module.exports = class Product {
-  constructor(id, title, imageUrl, description, price) {
-    this.id = id;
+const getdb = require("../util/database").getdb;
+class Product {
+  constructor(title, price, description, imageUrl, id, userId) {
     this.title = title;
-    this.imageUrl = imageUrl;
-    this.description = description;
     this.price = price;
+    this.description = description;
+    this.imageUrl = imageUrl;
+    this._id = id ? new mongodb.ObjectId(id) : null;
+    this.userId = userId;
   }
-
   save() {
-    return db.execute(
-      "INSERT INTO products (title, price, imageUrl, description) VALUES (?,?,?,?)",
-      [this.title, this.price, this.imageUrl, this.description]
-    );
+    const db = getdb();
+    let dbOp;
+
+    if (this._id) {
+      dbOp = db
+        .collection("products")
+        .updateOne({ _id: this._id }, { $set: this });
+    } else {
+      dbOp = db.collection("products").insertOne(this);
+    }
+
+    return dbOp
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   static fetchAll() {
-    return db.execute("SELECT * FROM products");
+    const db = getdb();
+    //return cursor
+    return db
+      .collection("products")
+      .find()
+      .toArray()
+      .then((products) => {
+        console.log(products);
+        return products;
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
-  static findById(id) {
-    return db.execute("SELECT * FROM products WHERE products.id =(?)", [id]);
+  static findById(prodId) {
+    const db = getdb();
+    return db
+      .collection("products")
+      .find({
+        _id: new mongodb.ObjectId(prodId),
+      })
+      .next()
+      .then((product) => {
+        console.log(product);
+        return product;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
-  static deleteProduct() {}
-};
+  static deleteById(prodId) {
+    const db = getdb();
+    return db
+      .collection("products")
+      .deleteOne({
+        _id: new mongodb.ObjectId(prodId),
+      })
+      .then((result) => {
+        console.log("Deleted");
+      })
+      .catch((error) => {
+        console.log(error);
+        throw error;
+      });
+  }
+}
+
+module.exports = Product;

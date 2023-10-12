@@ -2,45 +2,45 @@ const { createSecretKey } = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const p = path.join(
-  path.dirname(process.mainModule.filename),
-  "data",
-  "carts.json"
-);
+// const p = path.join(
+//   path.dirname(process.mainModule.filename),
+//   "data",
+//   "carts.json"
+// );
 
-const getProductsFromFile = (cb) => {
-  fs.readFile(p, (err, fileContent) => {
-    if (err) {
-      cb([]);
-    } else {
-      cb(JSON.parse(fileContent));
-    }
-  });
-};
+// const getProductsFromFile = (cb) => {
+//   fs.readFile(p, (err, fileContent) => {
+//     if (err) {
+//       cb([]);
+//     } else {
+//       cb(JSON.parse(fileContent));
+//     }
+//   });
+// };
 
 module.exports = class Cart {
-  static deleteProduct(id, productPrice) {
-    fs.readFile(p, (err, fileContent) => {
-      if (err) {
-        return;
-      }
-      const updatedCart = { ...JSON.parse(fileContent) };
-      const product = updatedCart.products.find((p) => p.id === id);
-      if (!product) {
-        return;
-      }
-      const productQty = product.qty;
-      updatedCart.products = updatedCart.products.filter(
-        (prod) => prod.id !== id
-      );
-      updatedCart.totalPrice =
-        updatedCart.totalPrice - productQty * productPrice;
+  // static deleteProduct(id, productPrice) {
+  //   fs.readFile(p, (err, fileContent) => {
+  //     if (err) {
+  //       return;
+  //     }
+  //     const updatedCart = { ...JSON.parse(fileContent) };
+  //     const product = updatedCart.products.find((p) => p.id === id);
+  //     if (!product) {
+  //       return;
+  //     }
+  //     const productQty = product.qty;
+  //     updatedCart.products = updatedCart.products.filter(
+  //       (prod) => prod.id !== id
+  //     );
+  //     updatedCart.totalPrice =
+  //       updatedCart.totalPrice - productQty * productPrice;
 
-      fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
-        console.log(err);
-      });
-    });
-  }
+  //     fs.writeFile(p, JSON.stringify(updatedCart), (err) => {
+  //       console.log(err);
+  //     });
+  //   });
+  // }
 
   static addToCart(id, productPrice) {
     //check if product exists
