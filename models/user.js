@@ -3,14 +3,16 @@ const Product = require("./product");
 const Schema = mongoose.Schema;
 const Order = require("./order");
 const userSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
   },
+  password: {
+    type: String,
+    required: true,
+  },
+  resetToken: String,
+  resetTokenExpires: Date,
   cart: {
     items: [
       {
